@@ -627,3 +627,62 @@ fn show_local_filter_prints_disk_content() {
         "expected local filter content, got: {stdout}"
     );
 }
+
+#[test]
+fn show_cargo_build_nested_embedded_path() {
+    // Verifies that show works for nested paths (cargo/build) in the embedded stdlib
+    let dir = tempfile::TempDir::new().unwrap();
+    let output = tokf()
+        .args(["show", "cargo/build"])
+        .current_dir(dir.path())
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "tokf show cargo/build should succeed"
+    );
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        stdout.contains("cargo build"),
+        "expected TOML with 'cargo build' command, got: {stdout}"
+    );
+    assert!(
+        stdout.contains("on_success") || stdout.contains("skip"),
+        "expected TOML content with on_success or skip, got: {stdout}"
+    );
+}
+
+#[test]
+fn run_embedded_filter_from_empty_dir() {
+    // From a directory with no local .tokf/filters, the embedded stdlib should still be active.
+    // Use `--verbose` to confirm the built-in filter was matched.
+    let dir = tempfile::TempDir::new().unwrap();
+    let output = tokf()
+        .args(["--verbose", "run", "git", "status"])
+        .current_dir(dir.path())
+        .output()
+        .unwrap();
+    // git status may succeed or fail depending on whether dir is a git repo; either is fine.
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("built-in") || stderr.contains("git/status"),
+        "expected verbose output indicating built-in filter was matched, got: {stderr}"
+    );
+}
+
+#[test]
+fn ls_verbose_shows_builtin_for_embedded_filter() {
+    // From a dir with no local filters, embedded stdlib filters should show source as <built-in>
+    let dir = tempfile::TempDir::new().unwrap();
+    let output = tokf()
+        .args(["ls", "--verbose"])
+        .current_dir(dir.path())
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(
+        stderr.contains("<built-in>"),
+        "expected '<built-in>' in verbose ls output for embedded filters, got: {stderr}"
+    );
+}

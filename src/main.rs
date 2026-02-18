@@ -352,7 +352,7 @@ fn cmd_show(filter: &str) -> i32 {
         return 1;
     };
 
-    let content = if resolved.source_path.starts_with("<built-in>") {
+    let content = if resolved.priority == u8::MAX {
         if let Some(c) = config::get_embedded_filter(&resolved.relative_path) {
             c.to_string()
         } else {
