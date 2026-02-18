@@ -293,6 +293,43 @@ fn ls_exits_zero() {
 }
 
 #[test]
+fn ls_stdlib_contains_all_expected_filters() {
+    // Copy stdlib filters into a repo-local .tokf/filters/ so the test is
+    // self-contained (the test binary lives in target/debug/, not the project root).
+    let dir = tempfile::TempDir::new().unwrap();
+    let filters_dir = dir.path().join(".tokf/filters");
+    std::fs::create_dir_all(&filters_dir).unwrap();
+
+    let stdlib = format!("{}/filters", manifest_dir());
+    for entry in std::fs::read_dir(&stdlib).unwrap() {
+        let entry = entry.unwrap();
+        std::fs::copy(entry.path(), filters_dir.join(entry.file_name())).unwrap();
+    }
+
+    let output = tokf()
+        .args(["ls"])
+        .current_dir(dir.path())
+        .output()
+        .unwrap();
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    for name in [
+        "cargo-test",
+        "git-add",
+        "git-commit",
+        "git-diff",
+        "git-log",
+        "git-push",
+        "git-status",
+    ] {
+        assert!(
+            stdout.contains(name),
+            "expected stdlib filter '{name}' in ls output, got: {stdout}"
+        );
+    }
+}
+
+#[test]
 fn ls_with_repo_local_filters() {
     // Create a temp dir with .tokf/filters containing a valid filter
     let dir = tempfile::TempDir::new().unwrap();

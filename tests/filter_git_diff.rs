@@ -5,7 +5,7 @@ use tokf::filter;
 use tokf::runner::CommandResult;
 
 fn load_config() -> FilterConfig {
-    let path = format!("{}/filters/git-add.toml", env!("CARGO_MANIFEST_DIR"));
+    let path = format!("{}/filters/git-diff.toml", env!("CARGO_MANIFEST_DIR"));
     let content = std::fs::read_to_string(&path).unwrap();
     toml::from_str(&content).unwrap()
 }
@@ -28,30 +28,39 @@ fn make_result(fixture: &str, exit_code: i32) -> CommandResult {
 }
 
 #[test]
-fn git_add_success() {
+fn git_diff_stat_passthrough() {
     let config = load_config();
-    let fixture = load_fixture("git_add_success.txt");
+    let fixture = load_fixture("git_diff_stat.txt");
     let result = make_result(&fixture, 0);
     let filtered = filter::apply(&config, &result);
-    assert_eq!(filtered.output, "ok \u{2713}");
+    assert_eq!(filtered.output, fixture);
 }
 
 #[test]
-fn git_add_fatal_match_output() {
+fn git_diff_empty_no_changes() {
     let config = load_config();
-    let fixture = load_fixture("git_add_fatal.txt");
+    let fixture = load_fixture("git_diff_empty.txt");
+    let result = make_result(&fixture, 0);
+    let filtered = filter::apply(&config, &result);
+    assert_eq!(filtered.output, "");
+}
+
+#[test]
+fn git_diff_fatal_match_output() {
+    let config = load_config();
+    let fixture = load_fixture("git_diff_failure.txt");
     // fatal: triggers match_output regardless of exit code
     let result = make_result(&fixture, 128);
     let filtered = filter::apply(&config, &result);
     // {line_containing} resolves to the line containing "fatal:"
     assert_eq!(
         filtered.output,
-        "\u{2717} fatal: pathspec 'nonexistent.txt' did not match any files"
+        "\u{2717} fatal: bad revision 'nonexistent'"
     );
 }
 
 #[test]
-fn git_add_failure_tail() {
+fn git_diff_non_fatal_failure_tail() {
     let config = load_config();
     // A non-fatal failure (no "fatal:" substring) → on_failure branch
     let result = make_result("error: something\nwent wrong\ndetails here", 1);

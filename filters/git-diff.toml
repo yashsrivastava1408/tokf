@@ -1,0 +1,18 @@
+# git-diff.toml — Override to --stat for compact output
+# Raw: full unified diff (potentially hundreds of lines)
+# Filtered: compact stat summary (files changed + insertions/deletions)
+
+command = "git diff"
+
+# Override: use --stat for compact summary output
+run = "git diff --stat {args}"
+
+match_output = [
+  { contains = "fatal:", output = "✗ {line_containing}" },
+]
+
+[on_success]
+output = "{output}"
+
+[on_failure]
+tail = 5

@@ -335,6 +335,26 @@ mod tests {
         assert_eq!(success.output.as_deref(), Some("{output}"));
     }
 
+    #[test]
+    fn test_deserialize_git_diff() {
+        let cfg = load_filter("git-diff.toml");
+
+        assert_eq!(cfg.command, "git diff");
+
+        let run = cfg.run.unwrap();
+        assert!(run.contains("--stat"));
+        assert!(run.contains("{args}"));
+
+        assert_eq!(cfg.match_output.len(), 1);
+        assert_eq!(cfg.match_output[0].contains, "fatal:");
+
+        let success = cfg.on_success.unwrap();
+        assert_eq!(success.output.as_deref(), Some("{output}"));
+
+        let failure = cfg.on_failure.unwrap();
+        assert_eq!(failure.tail, Some(5));
+    }
+
     // --- Minimal / defaults ---
 
     #[test]

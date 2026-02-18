@@ -1,12 +1,13 @@
 mod aggregate;
 mod extract;
 mod group;
+mod match_output;
 mod parse;
 pub mod section;
 mod skip;
 mod template;
 
-use crate::config::types::{FilterConfig, MatchOutputRule, OutputBranch};
+use crate::config::types::{FilterConfig, OutputBranch};
 use crate::runner::CommandResult;
 
 use self::section::SectionMap;
@@ -28,10 +29,9 @@ pub struct FilterResult {
 /// 6. Apply branch with sections, or fallback
 pub fn apply(config: &FilterConfig, result: &CommandResult) -> FilterResult {
     // 1. match_output short-circuit
-    if let Some(rule) = find_matching_rule(&config.match_output, &result.combined) {
-        return FilterResult {
-            output: rule.output.clone(),
-        };
+    if let Some(rule) = match_output::find_matching_rule(&config.match_output, &result.combined) {
+        let output = match_output::render_output(&rule.output, &rule.contains, &result.combined);
+        return FilterResult { output };
     }
 
     // 2. Top-level skip/keep pre-filtering
@@ -71,15 +71,6 @@ pub fn apply(config: &FilterConfig, result: &CommandResult) -> FilterResult {
     );
 
     FilterResult { output }
-}
-
-/// Find the first `match_output` rule whose `contains` substring appears
-/// in the combined output. Returns the matching rule, or `None`.
-fn find_matching_rule<'a>(
-    rules: &'a [MatchOutputRule],
-    combined: &str,
-) -> Option<&'a MatchOutputRule> {
-    rules.iter().find(|rule| combined.contains(&rule.contains))
 }
 
 /// Select the output branch based on exit code.
@@ -185,48 +176,6 @@ mod tests {
 
     fn minimal_config() -> FilterConfig {
         toml::from_str(r#"command = "test""#).unwrap()
-    }
-
-    // --- find_matching_rule ---
-
-    #[test]
-    fn match_output_first_match_wins() {
-        let rules = vec![
-            MatchOutputRule {
-                contains: "up-to-date".to_string(),
-                output: "ok (up-to-date)".to_string(),
-            },
-            MatchOutputRule {
-                contains: "rejected".to_string(),
-                output: "rejected!".to_string(),
-            },
-        ];
-        let matched = find_matching_rule(&rules, "Everything up-to-date");
-        assert_eq!(matched.unwrap().output, "ok (up-to-date)");
-    }
-
-    #[test]
-    fn match_output_no_match_returns_none() {
-        let rules = vec![MatchOutputRule {
-            contains: "NOMATCH".to_string(),
-            output: "nope".to_string(),
-        }];
-        assert!(find_matching_rule(&rules, "some output").is_none());
-    }
-
-    #[test]
-    fn match_output_empty_rules() {
-        assert!(find_matching_rule(&[], "anything").is_none());
-    }
-
-    #[test]
-    fn match_output_is_case_sensitive() {
-        let rules = vec![MatchOutputRule {
-            contains: "Fatal".to_string(),
-            output: "found".to_string(),
-        }];
-        assert!(find_matching_rule(&rules, "fatal: error").is_none());
-        assert!(find_matching_rule(&rules, "Fatal: error").is_some());
     }
 
     // --- select_branch ---
