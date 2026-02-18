@@ -43,6 +43,14 @@ fn hook_handle_rewrites_bash_git_status() {
 
     let response: serde_json::Value = serde_json::from_str(stdout.trim()).unwrap();
     assert_eq!(
+        response["hookSpecificOutput"]["hookEventName"],
+        "PreToolUse"
+    );
+    assert_eq!(
+        response["hookSpecificOutput"]["permissionDecision"],
+        "allow"
+    );
+    assert_eq!(
         response["hookSpecificOutput"]["updatedInput"]["command"],
         "tokf run git status"
     );
@@ -55,6 +63,14 @@ fn hook_handle_rewrites_bash_with_args() {
     assert!(success);
 
     let response: serde_json::Value = serde_json::from_str(stdout.trim()).unwrap();
+    assert_eq!(
+        response["hookSpecificOutput"]["hookEventName"],
+        "PreToolUse"
+    );
+    assert_eq!(
+        response["hookSpecificOutput"]["permissionDecision"],
+        "allow"
+    );
     assert_eq!(
         response["hookSpecificOutput"]["updatedInput"]["command"],
         "tokf run git push origin main"
@@ -146,6 +162,14 @@ fn hook_handle_fixture_bash() {
 
     let response: serde_json::Value = serde_json::from_str(stdout.trim()).unwrap();
     assert_eq!(
+        response["hookSpecificOutput"]["hookEventName"],
+        "PreToolUse"
+    );
+    assert_eq!(
+        response["hookSpecificOutput"]["permissionDecision"],
+        "allow"
+    );
+    assert_eq!(
         response["hookSpecificOutput"]["updatedInput"]["command"],
         "tokf run git status"
     );
@@ -205,6 +229,14 @@ fn hook_handle_multiple_pattern_first_variant() {
     );
     let response: serde_json::Value = serde_json::from_str(stdout.trim()).unwrap();
     assert_eq!(
+        response["hookSpecificOutput"]["hookEventName"],
+        "PreToolUse"
+    );
+    assert_eq!(
+        response["hookSpecificOutput"]["permissionDecision"],
+        "allow"
+    );
+    assert_eq!(
         response["hookSpecificOutput"]["updatedInput"]["command"],
         "tokf run pnpm test"
     );
@@ -219,6 +251,14 @@ fn hook_handle_multiple_pattern_second_variant() {
         r#"command = ["pnpm test", "npm test"]"#,
     );
     let response: serde_json::Value = serde_json::from_str(stdout.trim()).unwrap();
+    assert_eq!(
+        response["hookSpecificOutput"]["hookEventName"],
+        "PreToolUse"
+    );
+    assert_eq!(
+        response["hookSpecificOutput"]["permissionDecision"],
+        "allow"
+    );
     assert_eq!(
         response["hookSpecificOutput"]["updatedInput"]["command"],
         "tokf run npm test"

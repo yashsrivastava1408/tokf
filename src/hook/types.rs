@@ -23,6 +23,10 @@ pub struct HookResponse {
 /// The specific output that tells Claude Code to use a different command.
 #[derive(Debug, Clone, Serialize)]
 pub struct HookSpecificOutput {
+    #[serde(rename = "hookEventName")]
+    pub hook_event_name: &'static str,
+    #[serde(rename = "permissionDecision")]
+    pub permission_decision: &'static str,
     #[serde(rename = "updatedInput")]
     pub updated_input: UpdatedInput,
 }
@@ -38,6 +42,8 @@ impl HookResponse {
     pub const fn rewrite(command: String) -> Self {
         Self {
             hook_specific_output: HookSpecificOutput {
+                hook_event_name: "PreToolUse",
+                permission_decision: "allow",
                 updated_input: UpdatedInput { command },
             },
         }
@@ -77,9 +83,12 @@ mod tests {
     fn serialize_hook_response() {
         let response = HookResponse::rewrite("tokf run git status".to_string());
         let json = serde_json::to_string(&response).unwrap();
+        let value: serde_json::Value = serde_json::from_str(&json).unwrap();
+        assert_eq!(value["hookSpecificOutput"]["hookEventName"], "PreToolUse");
+        assert_eq!(value["hookSpecificOutput"]["permissionDecision"], "allow");
         assert_eq!(
-            json,
-            r#"{"hookSpecificOutput":{"updatedInput":{"command":"tokf run git status"}}}"#
+            value["hookSpecificOutput"]["updatedInput"]["command"],
+            "tokf run git status"
         );
     }
 
