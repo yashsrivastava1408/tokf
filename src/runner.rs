@@ -40,10 +40,16 @@ fn build_result(output: &std::process::Output) -> CommandResult {
 }
 
 /// Escape a string for safe inclusion in a shell command (single-quote wrapping).
+#[allow(dead_code)]
 fn shell_escape(arg: &str) -> String {
     format!("'{}'", arg.replace('\'', "'\\''"))
 }
 
+/// Execute a command with the given arguments.
+///
+/// # Errors
+///
+/// Returns an error if the command string is empty or the process fails to spawn.
 #[allow(dead_code)]
 pub fn execute(command: &str, args: &[String]) -> anyhow::Result<CommandResult> {
     let mut parts = command.split_whitespace();
@@ -57,6 +63,11 @@ pub fn execute(command: &str, args: &[String]) -> anyhow::Result<CommandResult> 
     Ok(build_result(&output))
 }
 
+/// Execute a shell command with `{args}` interpolation.
+///
+/// # Errors
+///
+/// Returns an error if the shell process fails to spawn.
 #[allow(dead_code)]
 pub fn execute_shell(run: &str, args: &[String]) -> anyhow::Result<CommandResult> {
     let joined_args = args
