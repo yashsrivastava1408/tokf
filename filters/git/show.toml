@@ -1,0 +1,10 @@
+command = "git show"
+
+# Override: use --stat for compact summary; full diff can be thousands of lines
+run = "git show --stat {args}"
+
+[on_success]
+output = "{output}"
+
+[on_failure]
+tail = 5

@@ -1,0 +1,4 @@
+# mypackage
+./main.go:15:5: undefined: fooBar
+./main.go:22:13: cannot use "hello" (untyped string constant) as int value in assignment
+./cmd/server.go:8:2: imported and not used: "fmt"

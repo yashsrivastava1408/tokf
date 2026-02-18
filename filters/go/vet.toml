@@ -1,0 +1,8 @@
+command = "go vet"
+keep = ["\\.go:\\d+"]
+
+[on_success]
+output = "✓ go vet: ok"
+
+[on_failure]
+tail = 20

@@ -1,0 +1,9 @@
+   Compiling bad-crate v0.1.0
+error[E0425]: cannot find value `missing_fn` in this scope
+ --> src/main.rs:5:5
+  |
+5 |     missing_fn();
+  |     ^^^^^^^^^^ not found in this scope
+
+error: aborting due to previous error
+error: failed to compile `bad-crate v0.1.0`

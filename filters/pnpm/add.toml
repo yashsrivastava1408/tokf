@@ -1,0 +1,12 @@
+command = "pnpm add *"
+skip = [
+  "^\\s*Progress:",
+  "^\\s*Downloading",
+  "^\\s*Already up to date",
+]
+
+[on_success]
+output = "{output}"
+
+[on_failure]
+tail = 10

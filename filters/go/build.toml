@@ -1,0 +1,8 @@
+command = "go build"
+keep = ["\\.go:\\d+"]
+
+[on_success]
+output = "✓ go build: ok"
+
+[on_failure]
+tail = 30

@@ -1,0 +1,9 @@
+Progress: resolved 45, reused 40, downloaded 5, added 0
+
+ ERR_PNPM_PEER_DEP_ISSUES  Unmet peer dependencies
+
+react-dom:
+  Missing peer react@">=18" from react-dom
+hint: If you want peer dependencies to be automatically installed, add "auto-install-peers=true" to an .npmrc file in the root of your project.
+
+ WARN  Issues with peer dependencies found

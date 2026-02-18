@@ -1,0 +1,8 @@
+command = "prisma generate"
+skip = ["^[┌│└─╔╗╚╝║═]", "^Prisma schema", "Environment variables"]
+
+[on_success]
+extract = { pattern = "Generated (.+)", output = "✓ Generated {1}" }
+
+[on_failure]
+tail = 10

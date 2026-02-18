@@ -1,0 +1,13 @@
+info  - Checking validity of types...
+info  - Creating an optimized production build...
+
+Failed to compile.
+
+./src/app/page.tsx
+Type error: Property 'title' does not exist on type 'PageProps'.
+
+  15 | export default function Page({ title }: PageProps) {
+     |                                ^^^^^
+
+./src/components/Button.tsx
+Type error: Argument of type 'string' is not assignable to parameter of type 'number'.

@@ -1,0 +1,12 @@
+> myproject@1.0.0 build
+> next build
+
+Creating an optimized production build...
+✓ Compiled successfully
+✓ Linting and checking validity of types...
+
+Route (app)          Size     First Load JS
+┌ ○ /                5.2 kB        87.2 kB
+└ ○ /about           3.1 kB        85.1 kB
++ First Load JS shared by all   82 kB
+✓ Done in 12.34s

@@ -1,0 +1,13 @@
+command = "tsc"
+
+match_output = [
+  { contains = "Found 0 errors", output = "✓ TypeScript: no errors" },
+]
+
+keep = ["\\(\\d+,\\d+\\): (error|warning)"]
+
+[on_success]
+output = "✓ TypeScript: ok"
+
+[on_failure]
+tail = 50

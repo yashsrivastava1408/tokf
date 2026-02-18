@@ -1,0 +1,4 @@
+Lockfile is up to date, resolution step is skipped
+Progress: resolved 234, reused 180, downloaded 0, added 0, done
+Already up to date
+Done in 0.4s

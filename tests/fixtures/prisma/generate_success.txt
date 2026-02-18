@@ -1,0 +1,9 @@
+Prisma schema loaded from prisma/schema.prisma
+Environment variables loaded from .env
+┌──────────────────────────────────────────────────────────────┐
+│                                                              │
+│   Update available 4.15.0 -> 5.0.0                          │
+│   Run the following to update: npm i --save-dev prisma@5     │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
+✔ Generated Prisma Client (v5.0.0) to ./node_modules/@prisma/client in 1.23s

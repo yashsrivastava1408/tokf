@@ -1,0 +1,8 @@
+Progress: resolved 12, reused 10, downloaded 0, added 0
+
+ ERR_PNPM_NO_MATCHING_VERSION  No matching version found for nonexistent-package@^99.0.0
+
+This error happened while installing a direct dependency of /path/to/project
+
+nonexistent-package@^99.0.0
+No matching version found for nonexistent-package@^99.0.0

@@ -1,0 +1,4 @@
+src/index.ts(1,14): error TS2322: Type 'string' is not assignable to type 'number'.
+src/utils.ts(10,5): error TS2305: Module '"./types"' has no exported member 'User'.
+src/utils.ts(15,8): warning TS2531: Object is possibly 'null'.
+Found 3 errors.

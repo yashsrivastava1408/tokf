@@ -1,0 +1,11 @@
+Prisma schema loaded from prisma/schema.prisma
+Environment variables loaded from .env
+
+error: Error validating field `authorId` in model `Post`: The type `Use` specified in the `@relation` attribute is not defined as a model, custom type, or enum.
+  -->  prisma/schema.prisma:13
+   |
+12 |   author   User   @relation(fields: [authorId], references: [id])
+13 |   authorId Use
+   |
+
+Validation Error Count: 1

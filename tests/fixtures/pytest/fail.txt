@@ -1,0 +1,12 @@
+================================= FAILURES =================================
+__________________________ test_addition ___________________________
+
+    def test_addition():
+        x = 1 + 1
+>       assert x == 3
+E       AssertionError: assert 2 == 3
+
+tests/test_example.py:7: AssertionError
+========================= short test summary info =========================
+FAILED tests/test_example.py::test_addition - AssertionError: assert 2 == 3
+1 failed, 3 passed in 0.87s

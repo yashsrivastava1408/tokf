@@ -1,0 +1,13 @@
+command = "next build"
+skip = [
+  "^info ",
+  "^Attention: Next\\.js now collects",
+  "^\\s*\\$\\s*next build",
+  "^\\s*telemetry",
+]
+
+[on_success]
+output = "{output}"
+
+[on_failure]
+tail = 20

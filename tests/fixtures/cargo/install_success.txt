@@ -1,0 +1,9 @@
+  Downloading ripgrep v13.0.0
+   Downloaded ripgrep v13.0.0
+   Locking 45 packages
+   Compiling grep v0.2.12
+   Compiling grep-regex v0.1.12
+   Compiling ripgrep v13.0.0
+    Finished `release` profile target(s) in 45.23s
+   Installing /Users/user/.cargo/bin/rg
+    Installed package `ripgrep v13.0.0` (executable `rg`)

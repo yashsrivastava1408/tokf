@@ -1,0 +1,24 @@
+command = "pytest"
+run = "pytest --tb=short -q {args}"
+
+[[section]]
+name = "failures"
+enter = "^=+ FAILURES =+$"
+exit = "^=+ short test summary"
+collect_as = "failure_lines"
+
+[[section]]
+name = "summary"
+match = "^(FAILED|ERROR|\\d+ passed)"
+collect_as = "summary_lines"
+
+[on_success]
+extract = { pattern = "(\\d+) passed", output = "✓ pytest: {1} passed" }
+
+[on_failure]
+output = """{failure_lines | join: "\n"}
+
+{summary_lines | join: "\n"}"""
+
+[fallback]
+tail = 10

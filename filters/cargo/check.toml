@@ -1,0 +1,14 @@
+command = "cargo check"
+skip = [
+  "^\\s*Compiling ",
+  "^\\s*Downloading ",
+  "^\\s*Locking ",
+  "^\\s*Updating ",
+  "^\\s*Fresh ",
+]
+
+[on_success]
+output = "✓ cargo check: ok"
+
+[on_failure]
+tail = 20
