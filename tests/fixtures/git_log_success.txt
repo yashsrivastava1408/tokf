@@ -1,0 +1,5 @@
+a1b2c3d feat(filter): implement section state machine
+e4f5g6h feat(filter): implement group/parse pipeline
+i7j8k9l feat(filter): implement skip/keep filtering
+m0n1o2p feat(runner): implement command execution
+q3r4s5t feat(config): implement FilterConfig types

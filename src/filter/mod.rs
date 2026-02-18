@@ -128,9 +128,10 @@ fn apply_branch(
             if !any_collected && vars.is_empty() {
                 return None; // sections expected but empty → fallback
             }
-            return Some(template::render_template(output_tmpl, &vars, sections));
         }
-        return Some(output_tmpl.clone());
+        let mut vars = vars;
+        vars.insert("output".to_string(), combined.to_string());
+        return Some(template::render_template(output_tmpl, &vars, sections));
     }
 
     // Non-template path (tail/head/skip/extract)
@@ -279,6 +280,35 @@ mod tests {
             extract: None,
         };
         assert_eq!(branch_apply(&branch, "anything"), "ok \u{2713}");
+    }
+
+    #[test]
+    fn branch_output_template_resolves_output_var() {
+        let branch = OutputBranch {
+            output: Some("{output}".to_string()),
+            aggregate: None,
+            tail: None,
+            head: None,
+            skip: vec![],
+            extract: None,
+        };
+        assert_eq!(branch_apply(&branch, "hello world"), "hello world");
+    }
+
+    #[test]
+    fn branch_output_template_with_surrounding_text() {
+        let branch = OutputBranch {
+            output: Some("Result: {output}".to_string()),
+            aggregate: None,
+            tail: None,
+            head: None,
+            skip: vec![],
+            extract: None,
+        };
+        assert_eq!(
+            branch_apply(&branch, "line1\nline2"),
+            "Result: line1\nline2"
+        );
     }
 
     #[test]
@@ -583,5 +613,81 @@ keep = ["^keep"]
 
         let result = make_result("drop me\nkeep this\ndrop too\nkeep that", 0);
         assert_eq!(apply(&config, &result).output, "keep this\nkeep that");
+    }
+
+    #[test]
+    fn apply_output_var_passthrough() {
+        let config: FilterConfig = toml::from_str(
+            r#"
+command = "test"
+[on_success]
+output = "{output}"
+"#,
+        )
+        .unwrap();
+
+        let result = make_result("line1\nline2\nline3", 0);
+        assert_eq!(apply(&config, &result).output, "line1\nline2\nline3");
+    }
+
+    #[test]
+    fn apply_output_var_with_skip_prefiltering() {
+        let config: FilterConfig = toml::from_str(
+            r#"
+command = "test"
+skip = ["^#"]
+[on_success]
+output = "{output}"
+"#,
+        )
+        .unwrap();
+
+        let result = make_result("# comment\nreal line\n# another", 0);
+        // {output} resolves to pre-filtered output (skip applied)
+        assert_eq!(apply(&config, &result).output, "real line");
+    }
+
+    #[test]
+    fn apply_output_var_in_failure_branch() {
+        let config: FilterConfig = toml::from_str(
+            r#"
+command = "test"
+[on_failure]
+output = "FAILED:\n{output}"
+"#,
+        )
+        .unwrap();
+
+        let result = make_result("error: something broke\ndetails here", 1);
+        assert_eq!(
+            apply(&config, &result).output,
+            "FAILED:\nerror: something broke\ndetails here"
+        );
+    }
+
+    #[test]
+    fn apply_output_var_with_sections() {
+        let config: FilterConfig = toml::from_str(
+            r#"
+command = "test"
+
+[[section]]
+name = "items"
+match = "^item:"
+collect_as = "items"
+
+[on_success]
+output = "Found {items.count} items in:\n{output}"
+"#,
+        )
+        .unwrap();
+
+        let input = "header\nitem: one\nitem: two\nfooter";
+        let result = make_result(input, 0);
+        let filtered = apply(&config, &result);
+        assert_eq!(
+            filtered.output,
+            "Found 2 items in:\nheader\nitem: one\nitem: two\nfooter"
+        );
     }
 }
