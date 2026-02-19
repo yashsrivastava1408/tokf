@@ -1,9 +1,11 @@
 mod aggregate;
+mod dedup;
 mod extract;
 mod group;
 mod lua;
 mod match_output;
 mod parse;
+mod replace;
 pub mod section;
 mod skip;
 mod template;
@@ -22,13 +24,18 @@ pub struct FilterResult {
 /// Apply a filter configuration to a command result.
 ///
 /// Processing order:
-/// 1. `match_output` — substring check against combined output, first match wins
-/// 2. Top-level `skip`/`keep` pre-filtering
-///    2b. Lua script escape hatch (if configured)
-/// 3. If `parse` exists → parse+output (alternative path to branches)
-/// 4. Collect sections (state machine routing)
-/// 5. Select branch by exit code (0 → `on_success`, else → `on_failure`)
-/// 6. Apply branch with sections, or fallback
+///
+/// ```text
+/// 1.   match_output  — substring check, first match wins
+/// 1.5. [[replace]]   — per-line regex transformations
+/// 2.   skip/keep     — top-level pre-filtering
+/// 2.5. dedup         — collapse duplicate lines
+/// 2b.  lua_script    — escape hatch (if configured)
+/// 3.   parse         — alternative structured path
+/// 4.   sections      — state-machine line collection
+/// 5.   select branch — exit code 0 → on_success, else on_failure
+/// 6.   apply branch  — render output or fallback
+/// ```
 pub fn apply(config: &FilterConfig, result: &CommandResult, args: &[String]) -> FilterResult {
     // 1. match_output short-circuit
     if let Some(rule) = match_output::find_matching_rule(&config.match_output, &result.combined) {
@@ -36,10 +43,28 @@ pub fn apply(config: &FilterConfig, result: &CommandResult, args: &[String]) -> 
         return FilterResult { output };
     }
 
+    // 1.5. Per-line [[replace]] transformations (before skip/keep)
+    let replace_buf: Vec<String>;
+    let raw_lines: Vec<&str> = if config.replace.is_empty() {
+        replace_buf = vec![];
+        let _ = &replace_buf; // ensure replace_buf outlives raw_lines
+        result.combined.lines().collect()
+    } else {
+        let initial: Vec<&str> = result.combined.lines().collect();
+        replace_buf = replace::apply_replace(&config.replace, &initial);
+        replace_buf.iter().map(String::as_str).collect()
+    };
+
     // 2. Top-level skip/keep pre-filtering
-    let lines: Vec<&str> = result.combined.lines().collect();
-    let lines = skip::apply_skip(&config.skip, &lines);
+    let lines = skip::apply_skip(&config.skip, &raw_lines);
     let lines = skip::apply_keep(&config.keep, &lines);
+
+    // 2.5. Dedup
+    let lines = if config.dedup {
+        dedup::apply_dedup(&lines, config.dedup_window)
+    } else {
+        lines
+    };
 
     // 2b. Lua script escape hatch
     if let Some(ref script_cfg) = config.lua_script {

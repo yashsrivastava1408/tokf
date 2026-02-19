@@ -24,7 +24,7 @@ pub fn apply_extract(rule: &ExtractRule, lines: &[&str]) -> String {
 ///
 /// Iterates in reverse order so `{10}` is replaced before `{1}`.
 /// Missing groups become empty strings.
-pub fn interpolate(template: &str, caps: &regex::Captures<'_>) -> String {
+pub(super) fn interpolate(template: &str, caps: &regex::Captures<'_>) -> String {
     let mut result = template.to_string();
     let max_group = caps.len().saturating_sub(1);
 
