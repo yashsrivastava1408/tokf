@@ -89,6 +89,17 @@ pub struct FilterConfig {
     /// Fallback behavior when no other rule matches.
     pub fallback: Option<FallbackConfig>,
 
+    /// Per-line regex replacement steps, applied before skip/keep.
+    #[serde(default)]
+    pub replace: Vec<ReplaceRule>,
+
+    /// Collapse consecutive identical lines (or within a sliding window).
+    #[serde(default)]
+    pub dedup: bool,
+
+    /// Window size for dedup (default: consecutive only).
+    pub dedup_window: Option<usize>,
+
     /// Optional Lua/Luau script escape hatch.
     #[serde(default)]
     pub lua_script: Option<ScriptConfig>,
@@ -243,6 +254,17 @@ pub struct OutputConfig {
 pub struct FallbackConfig {
     /// Number of lines to keep from the tail as a last resort.
     pub tail: Option<usize>,
+}
+
+/// One per-line regex replacement step.
+///
+/// Pattern is applied to each line; on match, the line is replaced with the
+/// interpolated output template. Capture groups use `{1}`, `{2}`, … syntax.
+/// Multiple rules run in order.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ReplaceRule {
+    pub pattern: String,
+    pub output: String,
 }
 
 /// Supported scripting languages for the `[lua_script]` escape hatch.
@@ -467,6 +489,9 @@ mod tests {
         assert_eq!(cfg.parse, None);
         assert_eq!(cfg.output, None);
         assert_eq!(cfg.fallback, None);
+        assert!(cfg.replace.is_empty());
+        assert!(!cfg.dedup);
+        assert_eq!(cfg.dedup_window, None);
         assert_eq!(cfg.lua_script, None);
     }
 
