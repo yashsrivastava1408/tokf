@@ -242,7 +242,7 @@ fn cmd_run(command_args: &[String], cli: &Cli) -> anyhow::Result<i32> {
 
     let input_bytes = cmd_result.combined.len();
     let start = std::time::Instant::now();
-    let filtered = filter::apply(&cfg, &cmd_result);
+    let filtered = filter::apply(&cfg, &cmd_result, &remaining_args);
     let elapsed = start.elapsed();
 
     if cli.timing {
@@ -309,7 +309,7 @@ fn cmd_test(
     };
 
     let start = std::time::Instant::now();
-    let filtered = filter::apply(&cfg, &cmd_result);
+    let filtered = filter::apply(&cfg, &cmd_result, &[]);
     let elapsed = start.elapsed();
 
     if cli.timing {

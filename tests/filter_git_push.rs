@@ -32,7 +32,7 @@ fn git_push_success_extracts_branch() {
     let config = load_config();
     let fixture = load_fixture("git_push_success.txt");
     let result = make_result(&fixture, 0);
-    let filtered = filter::apply(&config, &result);
+    let filtered = filter::apply(&config, &result, &[]);
     assert_eq!(filtered.output, "ok \u{2713} main");
 }
 
@@ -41,7 +41,7 @@ fn git_push_up_to_date() {
     let config = load_config();
     let fixture = load_fixture("git_push_up_to_date.txt");
     let result = make_result(&fixture, 0);
-    let filtered = filter::apply(&config, &result);
+    let filtered = filter::apply(&config, &result, &[]);
     assert_eq!(filtered.output, "ok (up-to-date)");
 }
 
@@ -52,7 +52,7 @@ fn git_push_rejected() {
     // rejected push may exit 0 or non-zero depending on git version,
     // but the match_output rule triggers regardless of exit code
     let result = make_result(&fixture, 1);
-    let filtered = filter::apply(&config, &result);
+    let filtered = filter::apply(&config, &result, &[]);
     assert_eq!(
         filtered.output,
         "\u{2717} push rejected (try pulling first)"
@@ -64,7 +64,7 @@ fn git_push_failure_passthrough_tail() {
     let config = load_config();
     let fixture = load_fixture("git_push_failure.txt");
     let result = make_result(&fixture, 128);
-    let filtered = filter::apply(&config, &result);
+    let filtered = filter::apply(&config, &result, &[]);
     // on_failure has tail = 10, but fixture has only 5 lines → all shown
     assert_eq!(filtered.output, fixture);
 }

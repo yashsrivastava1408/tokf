@@ -32,7 +32,7 @@ fn cargo_test_pass_aggregates_summaries() {
     let config = load_config();
     let fixture = load_fixture("cargo_test_pass.txt");
     let result = make_result(&fixture, 0);
-    let filtered = filter::apply(&config, &result);
+    let filtered = filter::apply(&config, &result, &[]);
     // 12 + 8 + 3 = 23 passed across 3 suites
     assert_eq!(filtered.output, "\u{2713} cargo test: 23 passed (3 suites)");
 }
@@ -42,7 +42,7 @@ fn cargo_test_fail_shows_failure_details() {
     let config = load_config();
     let fixture = load_fixture("cargo_test_fail.txt");
     let result = make_result(&fixture, 101);
-    let filtered = filter::apply(&config, &result);
+    let filtered = filter::apply(&config, &result, &[]);
 
     assert!(
         filtered.output.starts_with("FAILURES (2):"),
@@ -76,7 +76,7 @@ fn cargo_test_compile_error_falls_back_to_tail() {
     let config = load_config();
     let fixture = load_fixture("cargo_test_compile_error.txt");
     let result = make_result(&fixture, 101);
-    let filtered = filter::apply(&config, &result);
+    let filtered = filter::apply(&config, &result, &[]);
 
     // No sections matched → fallback tail = 5
     let lines: Vec<&str> = filtered.output.lines().collect();

@@ -32,7 +32,7 @@ fn git_commit_success_extracts_hash() {
     let config = load_config();
     let fixture = load_fixture("git_commit_success.txt");
     let result = make_result(&fixture, 0);
-    let filtered = filter::apply(&config, &result);
+    let filtered = filter::apply(&config, &result, &[]);
     assert_eq!(filtered.output, "ok \u{2713} abc1234");
 }
 
@@ -41,7 +41,7 @@ fn git_commit_failure_tail_passthrough() {
     let config = load_config();
     let fixture = load_fixture("git_commit_failure.txt");
     let result = make_result(&fixture, 1);
-    let filtered = filter::apply(&config, &result);
+    let filtered = filter::apply(&config, &result, &[]);
     // tail = 5, fixture has 4 lines → all shown
     assert_eq!(filtered.output, fixture);
 }

@@ -32,7 +32,7 @@ fn git_log_success_passthrough() {
     let config = load_config();
     let fixture = load_fixture("git_log_success.txt");
     let result = make_result(&fixture, 0);
-    let filtered = filter::apply(&config, &result);
+    let filtered = filter::apply(&config, &result, &[]);
     // {output} should resolve to the full command output
     assert_eq!(filtered.output, fixture);
 }
@@ -41,6 +41,6 @@ fn git_log_success_passthrough() {
 fn git_log_empty_output() {
     let config = load_config();
     let result = make_result("", 0);
-    let filtered = filter::apply(&config, &result);
+    let filtered = filter::apply(&config, &result, &[]);
     assert_eq!(filtered.output, "");
 }

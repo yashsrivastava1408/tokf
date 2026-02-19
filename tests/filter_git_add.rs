@@ -32,7 +32,7 @@ fn git_add_success() {
     let config = load_config();
     let fixture = load_fixture("git_add_success.txt");
     let result = make_result(&fixture, 0);
-    let filtered = filter::apply(&config, &result);
+    let filtered = filter::apply(&config, &result, &[]);
     assert_eq!(filtered.output, "ok \u{2713}");
 }
 
@@ -42,7 +42,7 @@ fn git_add_fatal_match_output() {
     let fixture = load_fixture("git_add_fatal.txt");
     // fatal: triggers match_output regardless of exit code
     let result = make_result(&fixture, 128);
-    let filtered = filter::apply(&config, &result);
+    let filtered = filter::apply(&config, &result, &[]);
     // {line_containing} resolves to the line containing "fatal:"
     assert_eq!(
         filtered.output,
@@ -55,7 +55,7 @@ fn git_add_failure_tail() {
     let config = load_config();
     // A non-fatal failure (no "fatal:" substring) → on_failure branch
     let result = make_result("error: something\nwent wrong\ndetails here", 1);
-    let filtered = filter::apply(&config, &result);
+    let filtered = filter::apply(&config, &result, &[]);
     // tail = 5, only 3 lines → all shown
     assert_eq!(
         filtered.output,

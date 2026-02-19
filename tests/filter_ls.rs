@@ -32,7 +32,7 @@ fn ls_success_passes_through_output() {
     let config = load_config();
     let fixture = load_fixture("ls_output.txt");
     let result = make_result(&fixture, 0);
-    let filtered = filter::apply(&config, &result);
+    let filtered = filter::apply(&config, &result, &[]);
     assert_eq!(filtered.output, fixture);
 }
 
@@ -41,7 +41,7 @@ fn ls_failure_shows_tail() {
     let config = load_config();
     let fixture = "ls: cannot access '/no/such/dir': No such file or directory";
     let result = make_result(fixture, 1);
-    let filtered = filter::apply(&config, &result);
+    let filtered = filter::apply(&config, &result, &[]);
     assert!(!filtered.output.is_empty());
     assert!(filtered.output.contains("No such file"));
 }

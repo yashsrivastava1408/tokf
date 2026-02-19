@@ -32,7 +32,7 @@ fn cargo_clippy_success_shows_ok() {
     let config = load_config();
     let fixture = load_fixture("cargo_clippy_success.txt");
     let result = make_result(&fixture, 0);
-    let filtered = filter::apply(&config, &result);
+    let filtered = filter::apply(&config, &result, &[]);
     assert_eq!(filtered.output, "ok ✓ no warnings");
 }
 
@@ -41,7 +41,7 @@ fn cargo_clippy_warning_shows_lint_output() {
     let config = load_config();
     let fixture = load_fixture("cargo_clippy_warning.txt");
     let result = make_result(&fixture, 1);
-    let filtered = filter::apply(&config, &result);
+    let filtered = filter::apply(&config, &result, &[]);
     // on_failure has tail = 30; should show warning/error lines
     assert!(!filtered.output.is_empty());
     assert!(
@@ -56,7 +56,7 @@ fn cargo_clippy_skips_checking_lines() {
     let config = load_config();
     let fixture = load_fixture("cargo_clippy_success.txt");
     let result = make_result(&fixture, 0);
-    let filtered = filter::apply(&config, &result);
+    let filtered = filter::apply(&config, &result, &[]);
     // on_success output = "ok ✓ no warnings" — checking noise is gone
     assert!(!filtered.output.contains("Checking"));
 }

@@ -32,7 +32,7 @@ fn git_status_normal() {
     let config = load_config();
     let fixture = load_fixture("git_status_normal.txt");
     let result = make_result(&fixture, 0);
-    let filtered = filter::apply(&config, &result);
+    let filtered = filter::apply(&config, &result, &[]);
     assert_eq!(
         filtered.output,
         "main\n  modified: 1\n  modified (unstaged): 1\n  untracked: 2"
@@ -44,7 +44,7 @@ fn git_status_clean() {
     let config = load_config();
     let fixture = load_fixture("git_status_clean.txt");
     let result = make_result(&fixture, 0);
-    let filtered = filter::apply(&config, &result);
+    let filtered = filter::apply(&config, &result, &[]);
     assert_eq!(filtered.output, "main\nclean \u{2014} nothing to commit");
 }
 
@@ -53,7 +53,7 @@ fn git_status_not_a_repo() {
     let config = load_config();
     let fixture = load_fixture("git_status_not_repo.txt");
     let result = make_result(&fixture, 128);
-    let filtered = filter::apply(&config, &result);
+    let filtered = filter::apply(&config, &result, &[]);
     assert_eq!(filtered.output, "Not a git repository");
 }
 
@@ -62,7 +62,7 @@ fn git_status_all_types() {
     let config = load_config();
     let fixture = load_fixture("git_status_all_types.txt");
     let result = make_result(&fixture, 0);
-    let filtered = filter::apply(&config, &result);
+    let filtered = filter::apply(&config, &result, &[]);
 
     // Exact expected output — alphabetically sorted labels with correct counts
     let expected = "\
