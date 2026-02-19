@@ -1,3 +1,4 @@
+mod cache_cmd;
 mod gain;
 
 use std::path::Path;
@@ -17,6 +18,7 @@ use tokf::tracking;
     name = "tokf",
     about = "Token filter — compress command output for LLM context"
 )]
+#[allow(clippy::struct_excessive_bools)] // CLI flags are naturally booleans
 struct Cli {
     /// Show how long filtering took
     #[arg(long, global = true)]
@@ -29,6 +31,10 @@ struct Cli {
     /// Show filter resolution details
     #[arg(short, long, global = true)]
     verbose: bool,
+
+    /// Bypass the binary config cache for this invocation
+    #[arg(long, global = true)]
+    no_cache: bool,
 
     #[command(subcommand)]
     command: Commands,
@@ -78,6 +84,11 @@ enum Commands {
         #[command(subcommand)]
         action: HookAction,
     },
+    /// Manage the filter resolution cache
+    Cache {
+        #[command(subcommand)]
+        action: cache_cmd::CacheAction,
+    },
     /// Show token savings statistics
     Gain {
         /// Show daily breakdown
@@ -109,9 +120,14 @@ enum HookAction {
 fn find_filter(
     command_args: &[String],
     verbose: bool,
+    no_cache: bool,
 ) -> anyhow::Result<(Option<FilterConfig>, usize)> {
     let search_dirs = config::default_search_dirs();
-    let resolved = config::discover_all_filters(&search_dirs)?;
+    let resolved = if no_cache {
+        config::discover_all_filters(&search_dirs)?
+    } else {
+        config::cache::discover_with_cache(&search_dirs)?
+    };
     let words: Vec<&str> = command_args.iter().map(String::as_str).collect();
 
     for filter in &resolved {
@@ -196,7 +212,7 @@ fn cmd_run(command_args: &[String], cli: &Cli) -> anyhow::Result<i32> {
     let (filter_cfg, words_consumed) = if cli.no_filter {
         (None, 0)
     } else {
-        find_filter(command_args, cli.verbose)?
+        find_filter(command_args, cli.verbose, cli.no_cache)?
     };
 
     let remaining_args: Vec<String> = if words_consumed > 0 {
@@ -309,7 +325,7 @@ fn cmd_test(
 
 fn cmd_ls(verbose: bool) -> i32 {
     let search_dirs = config::default_search_dirs();
-    let Ok(filters) = config::discover_all_filters(&search_dirs) else {
+    let Ok(filters) = config::cache::discover_with_cache(&search_dirs) else {
         eprintln!("[tokf] error: failed to discover filters");
         return 1;
     };
@@ -346,7 +362,7 @@ fn cmd_ls(verbose: bool) -> i32 {
 
 fn cmd_which(command: &str, verbose: bool) -> i32 {
     let search_dirs = config::default_search_dirs();
-    let Ok(filters) = config::discover_all_filters(&search_dirs) else {
+    let Ok(filters) = config::cache::discover_with_cache(&search_dirs) else {
         eprintln!("[tokf] error: failed to discover filters");
         return 1;
     };
@@ -407,6 +423,7 @@ fn main() {
             HookAction::Handle => cmd_hook_handle(),
             HookAction::Install { global } => cmd_hook_install(*global),
         },
+        Commands::Cache { action } => cache_cmd::run_cache_action(action),
         Commands::Gain {
             daily,
             by_filter,
@@ -421,7 +438,7 @@ fn cmd_show(filter: &str) -> i32 {
     let filter_name = filter.strip_suffix(".toml").unwrap_or(filter);
 
     let search_dirs = config::default_search_dirs();
-    let Ok(filters) = config::discover_all_filters(&search_dirs) else {
+    let Ok(filters) = config::cache::discover_with_cache(&search_dirs) else {
         eprintln!("[tokf] error: failed to discover filters");
         return 1;
     };
