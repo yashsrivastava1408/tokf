@@ -11,6 +11,7 @@ use tokf::filter;
 use tokf::hook;
 use tokf::rewrite;
 use tokf::runner;
+use tokf::skill;
 use tokf::tracking;
 
 #[derive(Parser)]
@@ -84,6 +85,11 @@ enum Commands {
         #[command(subcommand)]
         action: HookAction,
     },
+    /// Install the Claude Code filter-authoring skill
+    Skill {
+        #[command(subcommand)]
+        action: SkillAction,
+    },
     /// Manage the filter resolution cache
     Cache {
         #[command(subcommand)]
@@ -100,6 +106,16 @@ enum Commands {
         /// Output as JSON
         #[arg(long)]
         json: bool,
+    },
+}
+
+#[derive(Subcommand)]
+enum SkillAction {
+    /// Install skill files to .claude/skills/tokf-filter/ (project-local or global)
+    Install {
+        /// Install globally (~/.claude/skills/) instead of project-local (.claude/skills/)
+        #[arg(long)]
+        global: bool,
     },
 }
 
@@ -425,6 +441,9 @@ fn main() {
             HookAction::Handle => cmd_hook_handle(),
             HookAction::Install { global } => cmd_hook_install(*global),
         },
+        Commands::Skill { action } => match action {
+            SkillAction::Install { global } => cmd_skill_install(*global),
+        },
         Commands::Cache { action } => cache_cmd::run_cache_action(action),
         Commands::Gain {
             daily,
@@ -479,6 +498,16 @@ fn cmd_rewrite(command: &str) -> i32 {
     let result = rewrite::rewrite(command);
     println!("{result}");
     0
+}
+
+fn cmd_skill_install(global: bool) -> i32 {
+    match skill::install(global) {
+        Ok(()) => 0,
+        Err(e) => {
+            eprintln!("[tokf] error: {e:#}");
+            1
+        }
+    }
 }
 
 fn cmd_hook_handle() -> i32 {
