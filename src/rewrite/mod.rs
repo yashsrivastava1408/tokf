@@ -23,7 +23,7 @@ pub(crate) fn build_rules_from_filters(search_dirs: &[PathBuf]) -> Vec<RewriteRu
     let mut rules = Vec::new();
     let mut seen_patterns: std::collections::HashSet<String> = std::collections::HashSet::new();
 
-    let Ok(filters) = config::discover_all_filters(search_dirs) else {
+    let Ok(filters) = config::cache::discover_with_cache(search_dirs) else {
         return rules;
     };
 
