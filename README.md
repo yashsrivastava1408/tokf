@@ -111,6 +111,25 @@ tokf show git/push         # print the TOML source
 
 ---
 
+## Creating Filters with Claude
+
+tokf ships a Claude Code skill that teaches Claude the complete filter schema, processing order, step types, template pipes, and naming conventions.
+
+**Invoke automatically**: Claude will activate the skill whenever you ask to create or modify a filter — just describe what you want in natural language:
+
+> "Create a filter for `npm install` output that keeps only warnings and errors"
+> "Write a tokf filter for `pytest` that shows a summary on success and failure details on fail"
+
+**Invoke explicitly** with the `/tokf-filter` slash command:
+
+```
+/tokf-filter create a filter for docker build output
+```
+
+The skill is in `.claude/skills/tokf-filter/SKILL.md`. Reference material (exhaustive step docs and an annotated example TOML) lives in `.claude/skills/tokf-filter/references/`.
+
+---
+
 ## Writing a filter
 
 Filters are TOML files placed in `.tokf/filters/` (project-local) or `~/.config/tokf/filters/` (user-level). Project-local filters take priority over user-level, which take priority over the built-in library.
