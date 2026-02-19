@@ -3,6 +3,11 @@ name = "tokf"
 version = "0.1.0"
 edition = "2024"
 description = "Config-driven CLI tool that compresses command output before it reaches an LLM context"
+license = "MIT"
+repository = "https://github.com/mpecan/tokf"
+homepage = "https://github.com/mpecan/tokf"
+keywords = ["llm", "cli", "filter", "output", "tokens"]
+categories = ["command-line-utilities", "development-tools"]
 
 [dependencies]
 clap = { version = "4", features = ["derive"] }
